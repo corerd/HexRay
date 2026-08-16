@@ -40,8 +40,9 @@ bool MainApp::OnInit()
 
 MainFrame::MainFrame(wxWindow *parent) : MainFrameBase( parent )
 {
+    SetTitle(PROJECT_NAME); 
     SetIcon(wxICON(sample));
-    SetStatusText("Binary File Viewer");
+    SetStatusText("Select a file to view in binary mode");
 }
 
 MainFrame::~MainFrame()
@@ -86,6 +87,9 @@ void MainFrame::OnOpenClick(wxCommandEvent& event)
     std::vector<char> buffer(fileSize);
     file.read(buffer.data(), fileSize);
     file.close();
+
+    this->SetTitle(PROJECT_NAME " " + inputFilePath);
+    SetStatusText(wxEmptyString);
 
     // Print the header
     std::stringstream head;
@@ -171,7 +175,7 @@ void MainFrame::OnAboutClick(wxCommandEvent& event)
                     wxGetOsDescription(),
                     __GNUC__, __GNUC_MINOR__, __GNUC_PATCHLEVEL__
                  ),
-                 "About HexRay",
+                 "About " PROJECT_NAME " ver. " PROJECT_VERSION,
                  wxOK | wxICON_INFORMATION,
                  this);
 }

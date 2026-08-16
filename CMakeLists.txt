@@ -7,6 +7,9 @@ cmake_minimum_required(VERSION 3.10.0)
 # Name the project
 project(HexRay VERSION 0.1.0)
 
+# This generates a real config.h file from config.h.in template
+configure_file(config.h.in config.h)
+
 # Define wxWidgets environment variables.
 # WXWIN: the wxWidgets sources root directory
 # WXCFG: the build sub-directory of $WXWIN\lib
@@ -38,6 +41,9 @@ endif()
 
 # Define the build target for the executable
 add_executable(${PROJECT_NAME} ${SRC_FILES})
+
+# Ensure the compiler looks in the correct directory for the generated header
+target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
 # Link required libraries to the executable
 target_link_libraries(${PROJECT_NAME} ${wxWidgets_LIBRARIES})
