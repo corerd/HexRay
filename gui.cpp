@@ -15,6 +15,10 @@ MainFrameBase::MainFrameBase( wxWindow* parent, wxWindowID id, const wxString& t
 
 	m_menuBar = new wxMenuBar( 0 );
 	m_menuFile = new wxMenu();
+	wxMenuItem* menuFileOpen;
+	menuFileOpen = new wxMenuItem( m_menuFile, wxID_ANY, wxString( wxT("O&pen...") ) , wxT("Open file"), wxITEM_NORMAL );
+	m_menuFile->Append( menuFileOpen );
+
 	wxMenuItem* menuFileExit;
 	menuFileExit = new wxMenuItem( m_menuFile, wxID_ANY, wxString( wxT("E&xit") ) + wxT('\t') + wxT("Alt+X"), wxT("Quit this app"), wxITEM_NORMAL );
 	m_menuFile->Append( menuFileExit );
@@ -33,9 +37,17 @@ MainFrameBase::MainFrameBase( wxWindow* parent, wxWindowID id, const wxString& t
 	wxBoxSizer* mainSizer;
 	mainSizer = new wxBoxSizer( wxVERTICAL );
 
-	m_staticText1 = new wxStaticText( this, wxID_ANY, wxT("Hello World"), wxDefaultPosition, wxDefaultSize, 0 );
-	m_staticText1->Wrap( -1 );
-	mainSizer->Add( m_staticText1, 0, wxALL, 5 );
+	headDataCtrl = new wxTextCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+	headDataCtrl->SetFont( wxFont( wxNORMAL_FONT->GetPointSize(), wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, false, wxT("Courier New") ) );
+	headDataCtrl->Hide();
+
+	mainSizer->Add( headDataCtrl, 0, wxEXPAND|wxLEFT|wxRIGHT|wxTOP, 5 );
+
+	hexDataCtrl = new wxTextCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE|wxTE_READONLY );
+	hexDataCtrl->SetFont( wxFont( wxNORMAL_FONT->GetPointSize(), wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, false, wxT("Courier New") ) );
+	hexDataCtrl->Hide();
+
+	mainSizer->Add( hexDataCtrl, 1, wxBOTTOM|wxEXPAND|wxLEFT|wxRIGHT, 5 );
 
 
 	this->SetSizer( mainSizer );
@@ -46,6 +58,7 @@ MainFrameBase::MainFrameBase( wxWindow* parent, wxWindowID id, const wxString& t
 
 	// Connect Events
 	this->Connect( wxEVT_CLOSE_WINDOW, wxCloseEventHandler( MainFrameBase::OnCloseFrame ) );
+	m_menuFile->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainFrameBase::OnOpenClick ), this, menuFileOpen->GetId());
 	m_menuFile->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainFrameBase::OnExitClick ), this, menuFileExit->GetId());
 	m_menuHelp->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainFrameBase::OnAboutClick ), this, menuHelpAbout->GetId());
 }
