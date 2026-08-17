@@ -37,8 +37,8 @@ class MainFrameBase : public wxFrame
 		wxMenuBar* m_menuBar;
 		wxMenu* m_menuFile;
 		wxMenu* m_menuHelp;
-		wxTextCtrl* headDataCtrl;
-		wxTextCtrl* hexDataCtrl;
+		wxTextCtrl* dumpHeadLineCtrl;
+		wxTextCtrl* dumpTextCtrl;
 		wxStatusBar* m_statusBar;
 
 		// Virtual event handlers, override them in your derived class

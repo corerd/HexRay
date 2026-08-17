@@ -33,6 +33,7 @@ include(${wxWidgets_USE_FILE})
 set(SRC_FILES
     main.cpp
     gui.cpp
+    hexray.cpp
     )
 if(WIN32)
     # Include a RC file for windows
@@ -40,7 +41,7 @@ if(WIN32)
 endif()
 
 # Define the build target for the executable
-add_executable(${PROJECT_NAME} ${SRC_FILES})
+add_executable(${PROJECT_NAME} ${SRC_FILES})    
 
 # Ensure the compiler looks in the correct directory for the generated header
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_BINARY_DIR})

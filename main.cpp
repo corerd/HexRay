@@ -12,11 +12,6 @@
  *********************************************************************/
 
 #include "main.h"
-#include "hexray.h"
-#include <fstream>
-#include <sstream>
-#include <iomanip>
-#include <cctype>
 
 // initialize the application
 IMPLEMENT_APP(MainApp);
@@ -43,6 +38,8 @@ MainFrame::MainFrame(wxWindow *parent) : MainFrameBase( parent )
     SetTitle(PROJECT_NAME); 
     SetIcon(wxICON(sample));
     SetStatusText("Select a file to view in binary mode");
+
+    hexray = new HexRay();
 }
 
 MainFrame::~MainFrame()
@@ -61,9 +58,8 @@ void MainFrame::OnExitClick(wxCommandEvent& event)
 
 void MainFrame::OnOpenClick(wxCommandEvent& event)
 {
-    // Open the file in binary mode and read its content
+    // Select the file to dump
     wxString inputFilePath;
-    //wxFileDialog dlg(this, "Open File", "", "All files (*.*) | *.*");
     wxFileDialog dlg(this, "Open File", "", "");
     if (dlg.ShowModal() == wxID_OK)
     {
@@ -74,89 +70,21 @@ void MainFrame::OnOpenClick(wxCommandEvent& event)
         return;
     }
 
-    std::ifstream file(inputFilePath.ToStdString(), std::ios::binary | std::ios::ate);
-    if (!file.is_open())
+    // Get selected file content
+    hexray_raw = hexray->get_raw(inputFilePath.ToStdString());
+    if (hexray_raw.empty())
     {
-        wxMessageBox("Error: Could not open '" + inputFilePath + "' file.", "Error", wxOK | wxICON_ERROR, this);
+        wxMessageBox("Error: Could not read '" + inputFilePath + "' file.", "Error", wxOK | wxICON_ERROR, this);
         return;
     }
 
-    size_t fileSize = file.tellg();
-    file.seekg(0, std::ios::beg);
-
-    std::vector<char> buffer(fileSize);
-    file.read(buffer.data(), fileSize);
-    file.close();
-
+    // Finalize frame setup
     this->SetTitle(PROJECT_NAME " " + inputFilePath);
     SetStatusText(wxEmptyString);
 
-    // Print the header
-    std::stringstream head;
-    head << "           ";  // add the initial padding
-    for (size_t i = 0; i < HEXRAY_COLS; ++i)
-    {
-        // Force the hex formatting for the current index
-        head << std::hex << std::uppercase << std::setw(2) << std::setfill('0') << i;
-
-        // Add a space between bytes, but not after the last one
-        if (i < (HEXRAY_COLS-1)) {
-            if (i == (HEXRAY_COLS/2-1))
-            {
-                head << " - ";
-            }
-            else
-            {
-                head << " ";
-            }
-        }
-    }
-    headDataCtrl->Clear();
-    headDataCtrl->AppendText(wxString(head.str()));
-    headDataCtrl->Show(true);
-
-    // Print the file as a 3-column hexdump: offset, 16 raw bytes, ASCII
-    hexDataCtrl->Clear();
-    for (size_t offset = 0; offset < fileSize; offset += HEXRAY_COLS)
-    {
-        unsigned int val32 = static_cast<unsigned int>(offset);
-        wxString line = wxString::Format("%04X_%04X  ", (val32 >> 16), (val32 & 0xFFFF));
-        wxString ascii;
-
-        for (size_t i = 0; i < HEXRAY_COLS; ++i)
-        {
-            const size_t index = offset + i;
-
-            if (index < fileSize)
-            {
-                const unsigned char byte = static_cast<unsigned char>(buffer[index]);
-                line << wxString::Format("%02X ", byte);
-                ascii << (std::isprint(byte) ? static_cast<char>(byte) : '.');
-                if (i == (HEXRAY_COLS/2-1))
-                {
-                    line << "- ";
-                    ascii << ' ';
-                }
-            }
-            else
-            {
-                if (i == (HEXRAY_COLS/2-1))
-                {
-                    line << "     ";
-                    ascii << "  ";
-                }
-                else
-                {
-                    line << "   ";
-                    ascii << ' ';
-                }
-            }
-        }
-
-        line << "  " << ascii;
-        hexDataCtrl->AppendText(line + "\n");
-    }
-    hexDataCtrl->Show(true);
+    // Set hexadecimal dump area
+    hexray->build_head_line(*dumpHeadLineCtrl);
+    hexray->update_dump(*dumpTextCtrl, hexray_raw);
 
     // Ensure the sizer updates to accommodate the new space
     this->Layout();
