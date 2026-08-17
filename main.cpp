@@ -83,8 +83,8 @@ void MainFrame::OnOpenClick(wxCommandEvent& event)
     SetStatusText(wxEmptyString);
 
     // Set hexadecimal dump area
-    hexray->build_head_line(*dumpHeadLineCtrl);
-    hexray->update_dump(*dumpTextCtrl, hexray_raw);
+    hexray->build_head_line(*dumpHeadLineCtrl, HEXRAY_DEF_STEPS);
+    hexray->update_dump(*dumpTextCtrl, hexray_raw, HEXRAY_DEF_STEPS);
 
     // Ensure the sizer updates to accommodate the new space
     this->Layout();

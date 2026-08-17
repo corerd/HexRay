@@ -3,7 +3,6 @@
 #include <sstream>
 #include <iomanip>
 
-
 HexRay::HexRay()
 {
 }
@@ -33,25 +32,26 @@ std::vector<char> HexRay::get_raw(std::string input_file_path)
     return buffer;
 }
 
-void HexRay::build_head_line(wxTextCtrl& ctrl)
+void HexRay::build_head_line(wxTextCtrl& ctrl, int step)
 {
+    std::string blanks(1 + (step-1)*2, ' '); 
     std::stringstream line;
 
     line << "  Offset   ";  // add the initial padding
-    for (size_t i = 0; i < HEXRAY_COLS; ++i)
+    for (size_t i = 0; i < HEXRAY_COLS; i += step)
     {
-        // Force the hex formatting for the current index
+        // 1. Format the current index as a 2-character uppercase hex
         line << std::hex << std::uppercase << std::setw(2) << std::setfill('0') << i;
 
-        // Add a space between bytes, but not after the last one
-        if (i < (HEXRAY_COLS-1)) {
-            if (i == (HEXRAY_COLS/2-1))
+        // 2. Determine if there is a next element in the sequence
+        // otherwise don't add spaces between bytes
+        if (i + step < HEXRAY_COLS)
+        {
+            line << blanks;
+            // 3. Determine the position of the "midpoint" dash separator
+            if (i == (HEXRAY_COLS/2-step))
             {
-                line << " - ";
-            }
-            else
-            {
-                line << " ";
+                line << "- ";
             }
         }
     }
@@ -62,27 +62,60 @@ void HexRay::build_head_line(wxTextCtrl& ctrl)
     ctrl.Show(true);
 }
 
-void HexRay::update_dump(wxTextCtrl& ctrl, const std::vector<char>& raw_buffer)
+void HexRay::update_dump(wxTextCtrl& ctrl, const std::vector<char>& raw_buffer, int step)
 {
+    // Sanity check for step width (default to 1 byte if invalid)
+    if (step != 1 && step != 2 && step != 4)
+    {
+        step = 1;
+    }
+
+    // Format specifier: step * 2 characters (2 hex digits per byte) plus trailing space
+    wxString word_width = wxString::Format("%%0%dX ", step * 2);
     size_t raw_buffer_sz = raw_buffer.size();
 
     ctrl.Clear();
+    ctrl.Freeze(); // Freeze UI rendering to prevent flickering during mass updates
+
     for (size_t offset = 0; offset < raw_buffer_sz; offset += HEXRAY_COLS)
     {
         unsigned int val32 = static_cast<unsigned int>(offset);
         wxString line = wxString::Format("%04X_%04X  ", (val32 >> 16), (val32 & 0xFFFF));
         wxString ascii;
 
-        for (size_t i = 0; i < HEXRAY_COLS; ++i)
+        for (size_t i = 0; i < HEXRAY_COLS; i += step)
         {
             const size_t index = offset + i;
 
             if (index < raw_buffer_sz)
             {
-                const unsigned char byte = static_cast<unsigned char>(raw_buffer[index]);
-                line << wxString::Format("%02X ", byte);
-                ascii << (std::isprint(byte) ? static_cast<char>(byte) : '.');
-                if (i == (HEXRAY_COLS/2-1))
+                // 1. Reconstruct multi-byte word (Little-Endian)
+                unsigned int word_val = 0;
+                size_t bytes_read = 0;
+
+                for (int b = 0; b < step && (index + b) < raw_buffer_sz; ++b)
+                {
+                    const unsigned char byte = static_cast<unsigned char>(raw_buffer[index + b]);
+                    word_val |= (static_cast<unsigned int>(byte) << (b * 8));
+                    
+                    // Build ASCII representation byte-by-byte
+                    ascii << (std::isprint(byte) ? static_cast<char>(byte) : '.');
+                    bytes_read++;
+                }
+
+                // If a full word was read, format it; otherwise pad appropriately
+                if (bytes_read == static_cast<size_t>(step))
+                {
+                    line << wxString::Format(word_width, word_val);
+                }
+                else
+                {
+                    // Partial word at the end of buffer: pad hex section
+                    line << wxString(' ', step * 2 + 1);
+                }
+
+                // Midpoint separator logic
+                if (i == (HEXRAY_COLS / 2 - step))
                 {
                     line << "- ";
                     ascii << ' ';
@@ -90,14 +123,13 @@ void HexRay::update_dump(wxTextCtrl& ctrl, const std::vector<char>& raw_buffer)
             }
             else
             {
-                if (i == (HEXRAY_COLS/2-1))
+                // 2. Trailing blanks for completely empty slots
+                line << wxString(' ', step * 2 + 1);
+                ascii << wxString(' ', step);
+
+                if (i == (HEXRAY_COLS / 2 - step))
                 {
-                    line << "     ";
-                    ascii << "  ";
-                }
-                else
-                {
-                    line << "   ";
+                    line << "  "; // Match length of "- "
                     ascii << ' ';
                 }
             }
@@ -106,5 +138,7 @@ void HexRay::update_dump(wxTextCtrl& ctrl, const std::vector<char>& raw_buffer)
         line << "  " << ascii;
         ctrl.AppendText(line + "\n");
     }
+
+    ctrl.Thaw(); // Resume window painting
     ctrl.Show(true);
 }

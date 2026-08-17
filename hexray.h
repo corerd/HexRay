@@ -12,7 +12,9 @@
 #include <vector>
 #include <string>
 
-#define HEXRAY_COLS     32
+#define HEXRAY_COLS         32
+#define HEXRAY_DEF_STEPS    1  // step to 1, 2, or 4
+
 
 
 class HexRay
@@ -25,8 +27,8 @@ class HexRay
 		virtual ~HexRay();
 
         std::vector<char> get_raw(std::string input_file_path);
-        void build_head_line(wxTextCtrl& ctrl);
-        void update_dump(wxTextCtrl& ctrl, const std::vector<char>& raw_buffer);
+        void build_head_line(wxTextCtrl& ctrl, int step);
+        void update_dump(wxTextCtrl& ctrl, const std::vector<char>& raw_buffer, int step);
 };
 
 
