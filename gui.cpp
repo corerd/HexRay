@@ -34,6 +34,18 @@ MainFrameBase::MainFrameBase( wxWindow* parent, wxWindowID id, const wxString& t
 
 	this->SetMenuBar( m_menuBar );
 
+	m_toolBar1 = this->CreateToolBar( wxTB_HORIZONTAL, wxID_ANY );
+	m_staticText1 = new wxStaticText( m_toolBar1, wxID_ANY, wxT("  Word Size  "), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText1->Wrap( -1 );
+	m_toolBar1->AddControl( m_staticText1 );
+	wordSizeCombo = new wxComboBox( m_toolBar1, wxID_ANY, wxT(" 8-bit"), wxDefaultPosition, wxDefaultSize, 0, NULL, 0 );
+	wordSizeCombo->Append( wxT(" 8-bit") );
+	wordSizeCombo->Append( wxT("16-bit") );
+	wordSizeCombo->Append( wxT("32-bit") );
+	wordSizeCombo->SetSelection( 0 );
+	m_toolBar1->AddControl( wordSizeCombo );
+	m_toolBar1->Realize();
+
 	wxBoxSizer* mainSizer;
 	mainSizer = new wxBoxSizer( wxVERTICAL );
 
@@ -61,11 +73,13 @@ MainFrameBase::MainFrameBase( wxWindow* parent, wxWindowID id, const wxString& t
 	m_menuFile->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainFrameBase::OnOpenClick ), this, menuFileOpen->GetId());
 	m_menuFile->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainFrameBase::OnExitClick ), this, menuFileExit->GetId());
 	m_menuHelp->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MainFrameBase::OnAboutClick ), this, menuHelpAbout->GetId());
+	wordSizeCombo->Connect( wxEVT_COMMAND_COMBOBOX_SELECTED, wxCommandEventHandler( MainFrameBase::OnWordSizeSelection ), NULL, this );
 }
 
 MainFrameBase::~MainFrameBase()
 {
 	// Disconnect Events
 	this->Disconnect( wxEVT_CLOSE_WINDOW, wxCloseEventHandler( MainFrameBase::OnCloseFrame ) );
+	wordSizeCombo->Disconnect( wxEVT_COMMAND_COMBOBOX_SELECTED, wxCommandEventHandler( MainFrameBase::OnWordSizeSelection ), NULL, this );
 
 }

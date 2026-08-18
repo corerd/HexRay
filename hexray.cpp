@@ -48,10 +48,17 @@ void HexRay::build_head_line(wxTextCtrl& ctrl, int step)
         if (i + step < HEXRAY_COLS)
         {
             line << blanks;
-            // 3. Determine the position of the "midpoint" dash separator
+            // 3. Determine the position of the "midpoint" separator
             if (i == (HEXRAY_COLS/2-step))
             {
-                line << "- ";
+                if (step == 1)
+                {
+                    line << "- ";  // use a dash
+                }
+                else
+                {
+                    line << "  ";  // use a blank
+                }
             }
         }
     }
@@ -75,6 +82,10 @@ void HexRay::update_dump(wxTextCtrl& ctrl, const std::vector<char>& raw_buffer, 
     size_t raw_buffer_sz = raw_buffer.size();
 
     ctrl.Clear();
+
+    // Wrapping ctrl.Freeze() and ctrl.Thaw() around the processing loop.
+    // This prevents wxTextCtrl from repainting line-by-line, reducing UI lag during buffer updates.
+
     ctrl.Freeze(); // Freeze UI rendering to prevent flickering during mass updates
 
     for (size_t offset = 0; offset < raw_buffer_sz; offset += HEXRAY_COLS)
@@ -141,4 +152,29 @@ void HexRay::update_dump(wxTextCtrl& ctrl, const std::vector<char>& raw_buffer, 
 
     ctrl.Thaw(); // Resume window painting
     ctrl.Show(true);
+}
+
+int HexRay::get_step_size(int index)
+{
+    int step_size;
+
+    switch(index)
+    {
+        case 0:
+        step_size = 1;
+        break;
+        
+        case 1:
+        step_size = 2;
+        break;
+        
+        case 2:
+        step_size = 4;
+        break;
+
+        default:
+        step_size = HEXRAY_DEF_STEPS;
+    }
+
+    return step_size;
 }

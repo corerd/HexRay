@@ -18,6 +18,9 @@
 #include <wx/font.h>
 #include <wx/colour.h>
 #include <wx/settings.h>
+#include <wx/stattext.h>
+#include <wx/combobox.h>
+#include <wx/toolbar.h>
 #include <wx/textctrl.h>
 #include <wx/sizer.h>
 #include <wx/statusbr.h>
@@ -37,6 +40,9 @@ class MainFrameBase : public wxFrame
 		wxMenuBar* m_menuBar;
 		wxMenu* m_menuFile;
 		wxMenu* m_menuHelp;
+		wxToolBar* m_toolBar1;
+		wxStaticText* m_staticText1;
+		wxComboBox* wordSizeCombo;
 		wxTextCtrl* dumpHeadLineCtrl;
 		wxTextCtrl* dumpTextCtrl;
 		wxStatusBar* m_statusBar;
@@ -46,6 +52,7 @@ class MainFrameBase : public wxFrame
 		virtual void OnOpenClick( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnExitClick( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnAboutClick( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnWordSizeSelection( wxCommandEvent& event ) { event.Skip(); }
 
 
 	public:

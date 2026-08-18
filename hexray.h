@@ -29,6 +29,7 @@ class HexRay
         std::vector<char> get_raw(std::string input_file_path);
         void build_head_line(wxTextCtrl& ctrl, int step);
         void update_dump(wxTextCtrl& ctrl, const std::vector<char>& raw_buffer, int step);
+        int get_step_size(int index);
 };
 
 
