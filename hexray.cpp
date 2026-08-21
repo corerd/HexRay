@@ -93,6 +93,7 @@ void HexRay::update_dump(wxTextCtrl& ctrl, const std::vector<char>& raw_buffer, 
         unsigned int val32 = static_cast<unsigned int>(offset);
         wxString line = wxString::Format("%04X_%04X  ", (val32 >> 16), (val32 & 0xFFFF));
         wxString ascii;
+        bool padding = false;
 
         for (size_t i = 0; i < HEXRAY_COLS; i += step)
         {
@@ -114,22 +115,34 @@ void HexRay::update_dump(wxTextCtrl& ctrl, const std::vector<char>& raw_buffer, 
                     bytes_read++;
                 }
 
-                // If a full word was read, format it; otherwise pad appropriately
+                // If a full word was read, format it; otherwise print remaining bytes and pad.
                 if (bytes_read == static_cast<size_t>(step))
                 {
                     line << wxString::Format(word_width, word_val);
                 }
                 else
                 {
-                    // Partial word at the end of buffer: pad hex section
-                    line << wxString(' ', step * 2 + 1);
+                    // Partial word at the end of buffer: print what we have, then pad to keep alignment
+                    padding = true;
+                    wxString partial_word_width = wxString::Format("%%0%dX", static_cast<int>(bytes_read * 2));
+                    wxString partial = wxString::Format(partial_word_width, word_val);
+                    line << partial;
+                    line << wxString(' ', static_cast<int>((step - bytes_read) * 2));
+                    line << ' ';
                 }
 
                 // Midpoint separator logic
                 if (i == (HEXRAY_COLS / 2 - step))
                 {
-                    line << "- ";
                     ascii << ' ';
+                    if (!padding)  // Only add the dash if we didn't just pad
+                    {
+                        line << "- ";
+                    }
+                    else
+                    {
+                        line << "  "; // Match length of "- "
+                    }
                 }
             }
             else
