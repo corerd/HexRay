@@ -1,9 +1,9 @@
 /**
  *  config.h.in
- * 
+ *
  * This is a CMake configuration header template.
  * This allows CMake to "inject" the values from the build system into C++ source code.
- * 
+ *
  * Use this template adding the configure_file command to CMakeLists.txt.
  * This tells CMake to replace the @...@ placeholders with the actual values from the project() command.
  */
@@ -12,5 +12,8 @@
 
 #define PROJECT_NAME "@PROJECT_NAME@"
 #define PROJECT_VERSION "@PROJECT_VERSION@"
+
+#define COMPILER_ID "@CMAKE_CXX_COMPILER_ID@"
+#define COMPILER_VERSION "@CMAKE_CXX_COMPILER_VERSION@"
 
 #endif // __config__
