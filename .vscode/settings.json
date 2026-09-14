@@ -1,0 +1,33 @@
+{
+    // --- Editor Formatting ---
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "ms-vscode.cpptools",
+    "editor.bracketPairColorization.enabled": true,
+
+    // --- Formatting Specifics ---
+    "editor.tabSize": 4,
+    "editor.insertSpaces": true,
+    "files.trimTrailingWhitespace": true,
+    "files.insertFinalNewline": true,
+
+    // --- C/C++ Extension Configuration ---
+    "C_Cpp.default.cppStandard": "c++17",
+    "C_Cpp.intelliSenseEngine": "default",
+    "C_Cpp.default.compileCommands": "${workspaceFolder}/build/compile_commands.json",
+    "C_Cpp.default.intelliSenseMode": "windows-gcc-x64",
+    "C_Cpp.default.includePath": [
+        "${workspaceFolder}/**",
+        "${workspaceFolder}/build",
+        "${config:cmake.environment.WXWIN}/include",
+        "${config:cmake.environment.WXWIN}/lib/${config:cmake.environment.WXCFG}"
+    ],
+
+    // Configures C++ IntelliSense to take build flags directly from CMake Tools
+    "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
+
+    // --- CMake Tools Integration ---
+    "cmake.configureOnOpen": true,
+    "cmake.configureSettings": {
+        "CMAKE_BUILD_TYPE": "Debug"
+    }
+}
